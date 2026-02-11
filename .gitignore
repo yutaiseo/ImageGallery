@@ -17,6 +17,13 @@ test_*.php
 *_test.php
 /tests/temp/*
 
+# 文档中的敏感截图（保留演示截图目录）
+/docs/*.png
+/docs/*.jpg
+/docs/*.jpeg
+/docs/*.gif
+!/docs/screenshots/**
+
 # 环境变量
 .env
 .env.local
