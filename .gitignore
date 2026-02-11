@@ -16,6 +16,9 @@
 test_*.php
 *_test.php
 /tests/temp/*
+/Gallery/generate_test_images.php
+/Gallery/setup_test_data.php
+/test_image_compress.php
 
 # 文档中的敏感截图（保留演示截图目录）
 /docs/*.png
@@ -23,6 +26,18 @@ test_*.php
 /docs/*.jpeg
 /docs/*.gif
 !/docs/screenshots/**
+
+# 内部开发文档（包含敏感信息，不公开）
+/docs/AI开发标准.md
+/docs/开发记录.md
+/docs/TESTING_GUIDE.md
+/docs/CHANGES_SUMMARY.md
+/docs/COMPLETION_REPORT.md
+/docs/DELIVERY_CHECKLIST.md
+/docs/INSTALLER_FIX.md
+/docs/MONETIZATION_PLAN.md
+/docs/README_UPLOAD_COMPRESSION.md
+/docs/UPLOAD_COMPRESSION_UPDATE.md
 
 # 环境变量
 .env
@@ -38,6 +53,8 @@ test_*.php
 *.tmp
 *.temp
 *.cache
+*.bak
+*.backup
 /tmp/*
 
 # IDE 相关
