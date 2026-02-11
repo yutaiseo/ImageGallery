@@ -1,0 +1,71 @@
+# 配置文件
+/ctrol/config/config.php
+/ctrol/config/oss_config.json
+/ctrol/config/cloud_config.json
+
+# 上传文件
+/Gallery/uploads/*
+!/Gallery/uploads/.htaccess
+!/Gallery/uploads/index.html
+
+# 备份文件
+/backup/*
+!/backup/.gitkeep
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+
+# 日志文件
+*.log
+/logs/*
+!/logs/.gitkeep
+
+# 临时文件
+*.tmp
+*.temp
+*.cache
+/tmp/*
+
+# IDE 相关
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.project
+.settings/
+*.swp
+*.swo
+*~
+
+# 操作系统
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Composer
+/vendor/
+composer.lock
+
+# Node modules (如果使用前端构建工具)
+/node_modules/
+/npm-debug.log
+/yarn-error.log
+
+# 分发包
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# 测试覆盖率
+/coverage/
+/.phpunit.cache/
+
+# 其他
+.htpasswd

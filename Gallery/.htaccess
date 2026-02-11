@@ -1,0 +1,25 @@
+# Disable directory listing
+Options -Indexes
+
+# Protect sensitive files (Apache 2.4+)
+<FilesMatch "^(config\.php|config\.php\.bak|oss_config\.json|.*\.env|.*\.sql)$">
+  Require all denied
+</FilesMatch>
+
+# Fallback for Apache 2.2
+<IfModule !mod_authz_core.c>
+  <FilesMatch "^(config\.php|config\.php\.bak|oss_config\.json|.*\.env|.*\.sql)$">
+    Order allow,deny
+    Deny from all
+  </FilesMatch>
+</IfModule>
+
+# Allow /install/ public entry (actual logic is in run/ outside web root)
+RewriteEngine On
+
+# Route /install and /admin through the single entry point
+RewriteCond %{REQUEST_URI} ^/install(/|$)
+RewriteRule ^ index.php [L]
+RewriteCond %{REQUEST_URI} ^/admin(/|$)
+RewriteRule ^ index.php [L]
+ 

@@ -1,0 +1,20 @@
+# Prevent directory listing
+Options -Indexes
+
+# Disable PHP engine for mod_php
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php5.c>
+  php_flag engine off
+</IfModule>
+
+# Deny access to common script extensions
+<FilesMatch "\.(php|php5|phtml|phar|pl|py|jsp|asp|aspx)$">
+  Require all denied
+</FilesMatch>
+
+# Deny access to .htaccess itself
+<Files ".htaccess">
+  Require all denied
+</Files>
