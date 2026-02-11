@@ -3,7 +3,7 @@
 /ctrol/config/oss_config.json
 /ctrol/config/cloud_config.json
 
-# 上传文件
+# 上传文件（排除真实图片，保留安全文件）
 /Gallery/uploads/*
 !/Gallery/uploads/.htaccess
 !/Gallery/uploads/index.html
@@ -11,6 +11,11 @@
 # 备份文件
 /backup/*
 !/backup/.gitkeep
+
+# 测试文件
+test_*.php
+*_test.php
+/tests/temp/*
 
 # 环境变量
 .env
