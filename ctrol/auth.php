@@ -10,13 +10,30 @@ function require_admin()
         header('Location: /admin/login.php');
         exit;
     }
-    // 进一步检查角色为 admin
-    if (empty($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-        // 非管理员重定向或禁止访问
+    $role = $_SESSION['role'] ?? '';
+    if (!in_array($role, ['admin', 'superadmin'], true)) {
         header('HTTP/1.1 403 Forbidden');
         echo 'Forbidden: admin only';
         exit;
     }
+}
+
+function require_superadmin()
+{
+    if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+        header('Location: /admin/login.php');
+        exit;
+    }
+    if (empty($_SESSION['role']) || $_SESSION['role'] !== 'superadmin') {
+        header('HTTP/1.1 403 Forbidden');
+        echo 'Forbidden: superadmin only';
+        exit;
+    }
+}
+
+function is_superadmin()
+{
+    return !empty($_SESSION['role']) && $_SESSION['role'] === 'superadmin';
 }
 
 function current_user()

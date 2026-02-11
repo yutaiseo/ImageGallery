@@ -24,8 +24,12 @@ function random_password($len = 12) {
 
 $username = $argv[1] ?? '';
 if ($username === '') {
-    $stmt = $pdo->query("SELECT username FROM users WHERE role = 'admin' ORDER BY id ASC LIMIT 1");
+    $stmt = $pdo->query("SELECT username FROM users WHERE role = 'superadmin' ORDER BY id ASC LIMIT 1");
     $username = $stmt->fetchColumn();
+    if (!$username) {
+        $stmt = $pdo->query("SELECT username FROM users WHERE role = 'admin' ORDER BY id ASC LIMIT 1");
+        $username = $stmt->fetchColumn();
+    }
     if (!$username) {
         $stmt = $pdo->query("SELECT username FROM users ORDER BY id ASC LIMIT 1");
         $username = $stmt->fetchColumn();

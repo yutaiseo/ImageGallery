@@ -7,7 +7,7 @@
 session_start();
 
 // 检查是否登录且是管理员（简单验证）
-if (empty($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+if (empty($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'superadmin'], true)) {
     header('Content-Type: application/json');
     echo json_encode(['error' => '无权限访问']);
     http_response_code(403);

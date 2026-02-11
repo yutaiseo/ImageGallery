@@ -289,9 +289,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $configContent .= "if (\$stmt->rowCount() === 0) {\n";
                 $configContent .= "    \$hashedPassword = password_hash('" . addslashes($password) . "', PASSWORD_DEFAULT);\n";
                 $configContent .= "    \$pdo->prepare(\"INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)\")\n";
-                $configContent .= "        ->execute(['" . addslashes($username) . "', \$hashedPassword, 'admin']);\n";
+                $configContent .= "        ->execute(['" . addslashes($username) . "', \$hashedPassword, 'superadmin']);\n";
                 $configContent .= "} else {\n";
-                $configContent .= "    \$pdo->prepare(\"UPDATE users SET role = 'admin' WHERE username = ?\")\n";
+                $configContent .= "    \$pdo->prepare(\"UPDATE users SET role = 'superadmin' WHERE username = ?\")\n";
                 $configContent .= "        ->execute(['" . addslashes($username) . "']);\n";
                 $configContent .= "}\n\n";
                 

@@ -57,7 +57,7 @@ define('IS_HOME_PAGE', true);  // 标记为首页，footer 会保存缓存
 
 // 检查是否登录
 $isLoggedIn = isset($_SESSION['loggedin']) && $_SESSION['loggedin'];
-$isAdmin = !empty($_SESSION['role']) && $_SESSION['role'] === 'admin';
+$isAdmin = !empty($_SESSION['role']) && in_array($_SESSION['role'], ['admin', 'superadmin'], true);
 $perPage = 20;  // 首屏仅20张，极速响应
 ?>
 <?php require __DIR__ . '/header.php'; ?>

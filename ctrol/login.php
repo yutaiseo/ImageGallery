@@ -17,14 +17,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($user && password_verify($password, $user['password_hash'])) {
-                admin_on_login();
-                $_SESSION['loggedin'] = true;
-                $_SESSION['username'] = $username;
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['role'] = $user['role'];
-                log_action($pdo, $username, 'login', 'user login success');
-                header('Location: /admin/index.php');
-                exit;
+                if (!in_array($user['role'], ['admin', 'superadmin'], true)) {
+                    $error = '无权限登录后台';
+                    log_action($pdo, $username, 'login_denied', 'role denied: ' . ($user['role'] ?? 'unknown'));
+                } else {
+                    $role = $user['role'];
+                    if ($role === 'admin') {
+                        $countStmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'superadmin'");
+                        $superCount = (int)$countStmt->fetchColumn();
+                        if ($superCount === 0) {
+                            $promoteStmt = $pdo->prepare("UPDATE users SET role = 'superadmin' WHERE id = ?");
+                            $promoteStmt->execute([$user['id']]);
+                            $role = 'superadmin';
+                        }
+                    }
+
+                    admin_on_login();
+                    $_SESSION['loggedin'] = true;
+                    $_SESSION['username'] = $username;
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['role'] = $role;
+                    log_action($pdo, $username, 'login', 'user login success');
+                    header('Location: /admin/index.php');
+                    exit;
+                }
             } else {
                 $error = '用户名或密码错误';
                 log_action($pdo, $username, 'login_failed', 'login attempt failed');

@@ -44,7 +44,7 @@
 
 2. **克隆到本地**
    ```bash
-   git clone https://github.com/your-username/ImageGallery.git
+   git clone https://github.com/yutaiseo/ImageGallery.git
    cd ImageGallery
    ```
 

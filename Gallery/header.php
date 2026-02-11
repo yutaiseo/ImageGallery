@@ -11,7 +11,7 @@ $extraCssFiles = $extraCssFiles ?? [];
 $extraHeadHtml = $extraHeadHtml ?? '';
 
 $isLoggedIn = !empty($_SESSION['loggedin']);
-$isAdmin = !empty($_SESSION['role']) && $_SESSION['role'] === 'admin';
+$isAdmin = !empty($_SESSION['role']) && in_array($_SESSION['role'], ['admin', 'superadmin'], true);
 
 // 设置HTTP安全头部
 $csp = "default-src 'self'; " .
