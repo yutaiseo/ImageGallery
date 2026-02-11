@@ -126,14 +126,14 @@ Token 在 `/admin/backup.php` 页面获取。
 ## 📸 功能展示
 
 ### 前台展示
-![前台瀑布流](.github/screenshots/gallery.png)
-![全屏查看器](.github/screenshots/viewer.png)
+![前台瀑布流](docs/screenshots/gallery.png)
+![全屏查看器](docs/screenshots/viewer.png)
 
 ### 后台管理
-![仪表盘](.github/screenshots/dashboard.png)
-![图片管理](.github/screenshots/manage.png)
-![备份恢复](.github/screenshots/backup.png)
-![云存储配置](.github/screenshots/cloud.png)
+![仪表盘](docs/screenshots/dashboard.png)
+![图片管理](docs/screenshots/manage.png)
+![备份恢复](docs/screenshots/backup.png)
+![云存储配置](docs/screenshots/cloud.png)
 
 ## 📚 文档
 

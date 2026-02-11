@@ -5,14 +5,14 @@
 请将以下截图放置在此目录，用于 README.md 展示：
 
 ### 前台展示
-- [ ] `gallery.png` - 瀑布流主页（1920x1080）
-- [ ] `viewer.png` - 全屏图片查看器（1920x1080）
+- [x] `gallery.png` - 瀑布流主页（1920x1080）
+- [x] `viewer.png` - 全屏图片查看器（1920x1080）
 
 ### 后台管理
-- [ ] `dashboard.png` - 管理后台仪表盘
-- [ ] `manage.png` - 图片管理页面
-- [ ] `backup.png` - 备份恢复界面
-- [ ] `cloud.png` - 云存储配置页面
+- [x] `dashboard.png` - 管理后台仪表盘
+- [x] `manage.png` - 图片管理页面
+- [x] `backup.png` - 备份恢复界面
+- [x] `cloud.png` - 云存储配置页面
 
 ## 📝 截图规范
 
