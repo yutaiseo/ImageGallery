@@ -63,7 +63,7 @@
 
 #### 1. 下载代码
 ```bash
-git clone https://github.com/yourusername/ImageGallery.git
+git clone https://github.com/yutaiseo/ImageGallery.git
 cd ImageGallery
 ```
 
@@ -198,8 +198,8 @@ Token 在 `/admin/backup.php` 页面获取。
 
 - 作者：[Your Name]
 - 邮箱：your.email@example.com
-- 项目主页：https://github.com/yourusername/ImageGallery
-- 问题反馈：https://github.com/yourusername/ImageGallery/issues
+- 项目主页：https://github.com/yutaiseo/ImageGallery
+- 问题反馈：https://github.com/yutaiseo/ImageGallery/issues
 
 ## 🙏 致谢
 

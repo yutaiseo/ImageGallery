@@ -72,7 +72,7 @@ git commit -m "Initial commit: ImageGallery v1.1.0"
 # 描述：Professional image management system with cloud storage and backup
 
 # 3. 关联远程仓库
-git remote add origin https://github.com/yourusername/ImageGallery.git
+git remote add origin https://github.com/yutaiseo/ImageGallery.git
 git branch -M main
 git push -u origin main
 
@@ -100,9 +100,9 @@ git push origin v1.1.0
 #### README Badges
 在 README.md 顶部添加：
 ```markdown
-![GitHub stars](https://img.shields.io/github/stars/yourusername/ImageGallery?style=social)
-![GitHub forks](https://img.shields.io/github/forks/yourusername/ImageGallery?style=social)
-![GitHub issues](https://img.shields.io/github/issues/yourusername/ImageGallery)
+![GitHub stars](https://img.shields.io/github/stars/yutaiseo/ImageGallery?style=social)
+![GitHub forks](https://img.shields.io/github/forks/yutaiseo/ImageGallery?style=social)
+![GitHub issues](https://img.shields.io/github/issues/yutaiseo/ImageGallery)
 ```
 
 ### Phase 3: 推广渠道
@@ -119,7 +119,7 @@ git push origin v1.1.0
 - 🎨 响应式瀑布流布局
 - 🔒 权限管理和操作审计
 
-项目地址：https://github.com/yourusername/ImageGallery
+项目地址：https://github.com/yutaiseo/ImageGallery
 
 欢迎试用和反馈！
 ```

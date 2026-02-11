@@ -210,9 +210,9 @@ function handleImageClick(imageId) {
 
 有问题？可以：
 
-- 📖 查看 [Wiki 文档](https://github.com/yourusername/ImageGallery/wiki)
-- 💬 在 [Discussions](https://github.com/yourusername/ImageGallery/discussions) 提问
-- 🐛 在 [Issues](https://github.com/yourusername/ImageGallery/issues) 搜索类似问题
+- 📖 查看 [Wiki 文档](https://github.com/yutaiseo/ImageGallery/wiki)
+- 💬 在 [Discussions](https://github.com/yutaiseo/ImageGallery/discussions) 提问
+- 🐛 在 [Issues](https://github.com/yutaiseo/ImageGallery/issues) 搜索类似问题
 
 ## 贡献者名单
 
