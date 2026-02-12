@@ -6,10 +6,10 @@
   <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen" alt="PRs Welcome">
 </p>
 
-**ImageGallery** 是一个功能完整的企业级图片管理系统，支持本地存储和多云对象存储，内置智能备份恢复、权限管理、自动压缩等功能。适合个人、团队和企业使用。
-
 **Demo**：https://img.jzykk.com
 **GitHub**：https://github.com/yutaiseo/ImageGallery
+
+**ImageGallery** 是一个功能完整的企业级图片管理系统，支持本地存储和多云对象存储，内置智能备份恢复、权限管理、自动压缩等功能。适合个人、团队和企业使用。
 
 ## ✨ 核心特性
 
@@ -128,39 +128,18 @@ Token 在 `/admin/backup.php` 页面获取。
 
 ## 📸 功能展示
 
-<table>
-  <tr>
-    <th>前台展示</th>
-    <th>后台管理</th>
-  </tr>
-  <tr>
-    <td>
-      <strong>瀑布流主页</strong><br>
-      <img src="docs/screenshots/gallery.png" alt="前台瀑布流">
-      <br><br>
-      <strong>全屏查看器</strong><br>
-      <img src="docs/screenshots/viewer.png" alt="全屏查看器">
-    </td>
-    <td>
-      <strong>仪表盘</strong><br>
-      <img src="docs/screenshots/dashboard.png" alt="仪表盘">
-      <br><br>
-      <strong>图片管理</strong><br>
-      <img src="docs/screenshots/manage.png" alt="图片管理">
-      <br><br>
-      <strong>备份恢复</strong><br>
-      <img src="docs/screenshots/backup.png" alt="备份恢复">
-      <br><br>
-      <strong>云存储配置</strong><br>
-      <img src="docs/screenshots/cloud.png" alt="云存储配置">
-    </td>
-  </tr>
-</table>
+| 前台展示 | 后台管理 |
+| --- | --- |
+| **瀑布流主页**<br>![前台瀑布流](docs/screenshots/gallery.png) | **仪表盘**<br>![仪表盘](docs/screenshots/dashboard.png) |
+| **全屏查看器**<br>![全屏查看器](docs/screenshots/viewer.png) | **图片管理**<br>![图片管理](docs/screenshots/manage.png) |
+|  | **备份恢复**<br>![备份恢复](docs/screenshots/backup.png) |
+|  | **云存储配置**<br>![云存储配置](docs/screenshots/cloud.png) |
 
 ## 📚 文档
 
 - [部署指南](docs/部署说明.md)
 - [功能清单](docs/后台功能清单.md)
+- [开发记录](docs/开发记录.md)
 - [版本管理](docs/版本管理说明.md)
 - [更新日志](docs/CHANGELOG.md)
 
