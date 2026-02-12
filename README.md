@@ -132,8 +132,7 @@ Token 在 `/admin/backup.php` 页面获取。
 | --- | --- |
 | **瀑布流主页**<br>![前台瀑布流](docs/screenshots/gallery.png) | **仪表盘**<br>![仪表盘](docs/screenshots/dashboard.png) |
 | **全屏查看器**<br>![全屏查看器](docs/screenshots/viewer.png) | **图片管理**<br>![图片管理](docs/screenshots/manage.png) |
-|  | **备份恢复**<br>![备份恢复](docs/screenshots/backup.png) |
-|  | **云存储配置**<br>![云存储配置](docs/screenshots/cloud.png) |
+| **备份恢复**<br>![备份恢复](docs/screenshots/backup.png) | **云存储配置**<br>![云存储配置](docs/screenshots/cloud.png) |
 
 ## 📚 文档
 
