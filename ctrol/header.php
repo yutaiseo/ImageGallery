@@ -37,7 +37,10 @@ $isSuperadmin = !empty($_SESSION['role']) && $_SESSION['role'] === 'superadmin';
         <li class="nav-item"><a class="nav-link" href="/admin/users.php"><i class="fas fa-users"></i> 用户管理</a></li>
         <?php endif; ?>
         <li class="nav-item"><a class="nav-link" href="/admin/recycle.php"><i class="fas fa-trash"></i> 回收站</a></li>
-        <li class="nav-item"><a class="nav-link" href="/admin/settings.php"><i class="fas fa-cog"></i> 设置</a></li>        <li class="nav-item"><a class="nav-link" href="/admin/cloud.php"><i class="fas fa-cloud"></i> 云服务</a></li>        <li class="nav-item"><a class="nav-link" href="/admin/backup.php"><i class="fas fa-database"></i> 备份</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin/settings.php"><i class="fas fa-cog"></i> 设置</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin/change_password.php"><i class="fas fa-key"></i> 修改密码</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin/cloud.php"><i class="fas fa-cloud"></i> 云服务</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin/backup.php"><i class="fas fa-database"></i> 备份</a></li>
         <li class="nav-item"><a class="nav-link" href="/admin/logs.php"><i class="fas fa-file-alt"></i> 日志</a></li>
       </ul>
       <div class="d-flex align-items-center gap-2">

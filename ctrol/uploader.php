@@ -7,63 +7,81 @@ include __DIR__ . '/header.php';
 
 // 处理上传表单提交
 $upload_result = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
-    $token = $_POST['csrf_token'] ?? '';
-    if (!verify_csrf($token)) {
-        $upload_result = '<div class="alert alert-danger">CSRF 验证失败</div>';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $token = $_POST['csrf_token'] ?? '';
+  if (!verify_csrf($token)) {
+    $upload_result = '<div class="alert alert-danger">CSRF 验证失败</div>';
+  } else {
+    $title = trim($_POST['title'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $type = $_POST['type'] ?? 'local';
+
+    $filePath = '';
+    $isRemote = 0;
+
+    if ($type === 'remote') {
+      $remoteUrl = trim($_POST['remote_url'] ?? '');
+      if (empty($remoteUrl) || !preg_match('/\.(jpeg|jpg|gif|png|webp)$/i', $remoteUrl) || strpos($remoteUrl, 'http') !== 0) {
+        $upload_result = '<div class="alert alert-danger">❌ 无效的远程图片URL</div>';
+      } else {
+        if ($title === '') {
+          $path = parse_url($remoteUrl, PHP_URL_PATH);
+          $title = $path ? pathinfo($path, PATHINFO_FILENAME) : 'remote-image';
+        }
+        $filePath = $remoteUrl;
+        $isRemote = 1;
+      }
     } else {
+      if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+        $upload_result = '<div class="alert alert-danger">❌ 本地上传失败</div>';
+      } else {
         $file = $_FILES['image'];
         $maxSize = 2 * 1024 * 1024; // 2MB
-        
+
         $imageInfo = @getimagesize($file['tmp_name']);
         $validTypes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp'];
 
         if ($imageInfo === false) {
-            $upload_result = '<div class="alert alert-danger">❌ 不是有效的图片文件</div>';
+          $upload_result = '<div class="alert alert-danger">❌ 不是有效的图片文件</div>';
         } elseif (!isset($validTypes[$imageInfo['mime']])) {
-            $upload_result = '<div class="alert alert-danger">❌ 仅支持 JPEG、PNG、GIF、WebP 格式</div>';
+          $upload_result = '<div class="alert alert-danger">❌ 仅支持 JPEG、PNG、GIF、WebP 格式</div>';
         } elseif ($file['size'] > $maxSize) {
-            $upload_result = '<div class="alert alert-danger">❌ 文件大小超过 2MB 限制</div>';
+          $upload_result = '<div class="alert alert-danger">❌ 文件大小超过 2MB 限制</div>';
         } else {
-            // 验证通过，保存文件
-            $extension = $validTypes[$imageInfo['mime']];
-            $fileName = bin2hex(random_bytes(8)) . '.' . $extension;
-            $targetPath = upload_storage_path($fileName);
+          $extension = $validTypes[$imageInfo['mime']];
+          $fileName = bin2hex(random_bytes(8)) . '.' . $extension;
+          $targetPath = upload_storage_path($fileName);
 
-            if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-                // 获取图片标题
-                $title = trim($_POST['title'] ?? '');
-                $description = trim($_POST['description'] ?? '');
-                
-                if (empty($title)) {
-                    $title = pathinfo($file['name'], PATHINFO_FILENAME);
-                }
-
-                try {
-                    // 插入数据库记录
-                    $stmt = $pdo->prepare(
-                        'INSERT INTO images (title, description, file_path, uploaded_by, created_at) 
-                         VALUES (?, ?, ?, ?, NOW())'
-                    );
-                    $stmt->execute([
-                        $title,
-                        $description,
-                        'uploads/' . $fileName,
-                        $_SESSION['username'] ?? 'admin'
-                    ]);
-
-                    log_action($pdo, $_SESSION['username'] ?? 'admin', 'upload_image', 'uploaded image: ' . $title);
-                    $upload_result = '<div class="alert alert-success">✅ 上传成功！图片已保存为：<strong>' . htmlspecialchars($title) . '</strong></div>';
-                } catch (PDOException $e) {
-                    @unlink($targetPath);
-                    $upload_result = '<div class="alert alert-danger">❌ 保存到数据库失败，已删除上传文件</div>';
-                    error_log('Upload DB error: ' . $e->getMessage());
-                }
-            } else {
-                $upload_result = '<div class="alert alert-danger">❌ 文件保存失败，请检查目录权限</div>';
+          if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+            if ($title === '') {
+              $title = pathinfo($file['name'], PATHINFO_FILENAME);
             }
+            $filePath = 'uploads/' . $fileName;
+          } else {
+            $upload_result = '<div class="alert alert-danger">❌ 文件保存失败，请检查目录权限</div>';
+          }
         }
+      }
     }
+
+    if ($filePath !== '' && $upload_result === '') {
+      try {
+        $stmt = $pdo->prepare(
+          'INSERT INTO images (title, description, file_path, is_remote, created_at) VALUES (?, ?, ?, ?, NOW())'
+        );
+        $stmt->execute([$title, $description, $filePath, $isRemote]);
+        log_action($pdo, $_SESSION['username'] ?? 'admin', 'upload_image', 'uploaded image: ' . $title);
+        $upload_result = '<div class="alert alert-success">✅ 上传成功！图片已保存为：<strong>' . htmlspecialchars($title) . '</strong></div>';
+      } catch (PDOException $e) {
+        if ($isRemote === 0 && $filePath !== '' && strpos($filePath, 'uploads/') === 0) {
+          $localPath = upload_storage_path(basename($filePath));
+          @unlink($localPath);
+        }
+        $upload_result = '<div class="alert alert-danger">❌ 保存到数据库失败</div>';
+        error_log('Upload DB error: ' . $e->getMessage());
+      }
+    }
+  }
 }
 ?>
 
@@ -72,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
 
   <?php echo $upload_result; ?>
 
-  <form method="post" enctype="multipart/form-data" id="uploadForm">
+  <form method="post" enctype="multipart/form-data" id="adminAddImageForm">
     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
 
     <div class="row">
@@ -88,14 +106,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
         </div>
 
         <div class="mb-3">
-          <button type="submit" class="btn btn-primary">
+          <label class="form-label">上传类型 <span class="text-danger">*</span></label>
+          <select class="form-select" id="adminUploadType" name="type" required>
+            <option value="">请选择类型</option>
+            <option value="local" selected>本地上传</option>
+            <option value="remote">远程链接</option>
+          </select>
+        </div>
+
+        <div class="mb-3 d-none" id="adminRemoteField">
+          <label class="form-label">远程图片链接 <span class="text-danger">*</span></label>
+          <input type="url" name="remote_url" class="form-control" placeholder="https://example.com/image.jpg">
+          <small class="text-muted">支持 JPG/PNG/GIF/WebP</small>
+        </div>
+
+        <div class="mb-3">
+          <button type="submit" class="btn btn-primary" id="adminSubmitBtn">
             <i class="fas fa-upload"></i> 上传图片
           </button>
         </div>
       </div>
 
       <div class="col-md-6">
-        <div class="mb-3">
+        <div class="mb-3" id="adminLocalField">
           <label class="form-label">选择图片文件 <span class="text-danger">*</span></label>
           <div class="file-drop-area border border-2 border-dashed rounded p-4 text-center" id="dropArea">
             <div>
@@ -106,14 +139,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
               <small class="text-muted d-block">支持格式：JPEG、PNG、GIF、WebP</small>
               <small class="text-muted d-block">最大文件大小：2MB</small>
             </div>
-            <input type="file" name="image" id="imageInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display: none;" required>
+            <input type="file" name="image" id="adminImageInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display: none;" required>
           </div>
         </div>
 
         <div class="mb-3" id="previewContainer" style="display: none;">
           <label class="form-label">预览</label>
           <img id="imagePreview" src="" alt="预览" class="img-thumbnail" style="max-width: 100%; max-height: 300px; object-fit: contain;">
-          <p id="fileName" class="text-muted small mt-2"></p>
+          <p id="adminFileName" class="text-muted small mt-2"></p>
         </div>
       </div>
     </div>
@@ -122,12 +155,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  const uploadType = document.getElementById('adminUploadType');
+  const remoteField = document.getElementById('adminRemoteField');
+  const localField = document.getElementById('adminLocalField');
   const dropArea = document.getElementById('dropArea');
-  const fileInput = document.getElementById('imageInput');
+  const fileInput = document.getElementById('adminImageInput');
   const imagePreview = document.getElementById('imagePreview');
   const imageTitle = document.getElementById('imageTitle');
-  const fileName = document.getElementById('fileName');
+  const fileName = document.getElementById('adminFileName');
   const previewContainer = document.getElementById('previewContainer');
+  const form = document.getElementById('adminAddImageForm');
+
+  function updateUploadFields() {
+    const remoteInput = document.querySelector('input[name="remote_url"]');
+    if (uploadType.value === 'remote') {
+      remoteField.classList.remove('d-none');
+      localField.classList.add('d-none');
+      fileInput.required = false;
+      fileInput.value = '';
+      if (remoteInput) {
+        remoteInput.required = true;
+        remoteInput.classList.remove('is-invalid');
+      }
+    } else if (uploadType.value === 'local') {
+      remoteField.classList.add('d-none');
+      localField.classList.remove('d-none');
+      fileInput.required = true;
+      if (remoteInput) {
+        remoteInput.required = false;
+        remoteInput.value = '';
+        remoteInput.classList.remove('is-invalid');
+      }
+    } else {
+      remoteField.classList.add('d-none');
+      localField.classList.add('d-none');
+      fileInput.required = false;
+      if (remoteInput) {
+        remoteInput.required = false;
+        remoteInput.classList.remove('is-invalid');
+      }
+    }
+  }
+
+  if (uploadType) {
+    updateUploadFields();
+    uploadType.addEventListener('change', updateUploadFields);
+  }
 
   // 点击触发文件选择
   dropArea.addEventListener('click', () => fileInput.click());
@@ -193,6 +266,18 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     };
     reader.readAsDataURL(file);
+  }
+
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      if (uploadType && uploadType.value === 'remote') {
+        const remoteInput = document.querySelector('input[name="remote_url"]');
+        if (!remoteInput || !remoteInput.value || !/^https?:\/\/.+/i.test(remoteInput.value)) {
+          e.preventDefault();
+          remoteInput.classList.add('is-invalid');
+        }
+      }
+    });
   }
 });
 </script>
