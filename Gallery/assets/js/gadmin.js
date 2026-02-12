@@ -56,7 +56,8 @@ document.addEventListener('DOMContentLoaded', function () {
   var recycleForm = document.getElementById('recycleBatchForm');
   if (recycleForm) {
     recycleForm.addEventListener('submit', function (e) {
-      var act = recycleForm.action.value;
+      var actionInput = recycleForm.querySelector('input[name="action"]');
+      var act = actionInput ? actionInput.value : '';
       if (!act) {
         e.preventDefault();
         if (window.showToast) window.showToast('请选择批量操作', 'warning');
@@ -88,8 +89,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
       var form = document.getElementById(formId);
       if (!form) return;
-      if (form.action) {
-        form.action.value = action;
+      var actionInput = form.querySelector('input[name="action"]');
+      if (actionInput) {
+        actionInput.value = action;
       }
       var idInput = form.querySelector('input[name="id"]');
       if (idInput) {
@@ -104,7 +106,10 @@ document.addEventListener('DOMContentLoaded', function () {
       var action = btn.getAttribute('data-action');
       var message = btn.getAttribute('data-confirm') || '确认执行该操作？';
       if (!action) return;
-      recycleForm.action.value = action;
+      var actionInput = recycleForm ? recycleForm.querySelector('input[name="action"]') : null;
+      if (actionInput) {
+        actionInput.value = action;
+      }
       if (!confirm(message)) {
         e.preventDefault();
       }
