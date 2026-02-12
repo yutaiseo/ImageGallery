@@ -32,39 +32,84 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $isRemote = 1;
       }
     } else {
-      if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+      if (empty($_FILES['images'])) {
         $upload_result = '<div class="alert alert-danger">❌ 本地上传失败</div>';
       } else {
-        $file = $_FILES['image'];
+        $files = $_FILES['images'];
         $maxSize = 2 * 1024 * 1024; // 2MB
-
-        $imageInfo = @getimagesize($file['tmp_name']);
         $validTypes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp'];
 
-        if ($imageInfo === false) {
-          $upload_result = '<div class="alert alert-danger">❌ 不是有效的图片文件</div>';
-        } elseif (!isset($validTypes[$imageInfo['mime']])) {
-          $upload_result = '<div class="alert alert-danger">❌ 仅支持 JPEG、PNG、GIF、WebP 格式</div>';
-        } elseif ($file['size'] > $maxSize) {
-          $upload_result = '<div class="alert alert-danger">❌ 文件大小超过 2MB 限制</div>';
-        } else {
-          $extension = $validTypes[$imageInfo['mime']];
-          $fileName = bin2hex(random_bytes(8)) . '.' . $extension;
-          $targetPath = upload_storage_path($fileName);
+        $count = is_array($files['name']) ? count($files['name']) : 0;
+        $successCount = 0;
+        $failCount = 0;
+        $messages = [];
 
-          if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-            if ($title === '') {
-              $title = pathinfo($file['name'], PATHINFO_FILENAME);
-            }
-            $filePath = 'uploads/' . $fileName;
-          } else {
-            $upload_result = '<div class="alert alert-danger">❌ 文件保存失败，请检查目录权限</div>';
+        for ($i = 0; $i < $count; $i++) {
+          if ($files['error'][$i] !== UPLOAD_ERR_OK) {
+            $failCount++;
+            $messages[] = htmlspecialchars($files['name'][$i]) . '：上传失败';
+            continue;
           }
+
+          $tmpName = $files['tmp_name'][$i];
+          $fileNameOriginal = $files['name'][$i];
+          $fileSize = $files['size'][$i];
+
+          $imageInfo = @getimagesize($tmpName);
+          if ($imageInfo === false || !isset($validTypes[$imageInfo['mime']])) {
+            $failCount++;
+            $messages[] = htmlspecialchars($fileNameOriginal) . '：格式无效';
+            continue;
+          }
+          if ($fileSize > $maxSize) {
+            $failCount++;
+            $messages[] = htmlspecialchars($fileNameOriginal) . '：超过 2MB 限制';
+            continue;
+          }
+
+          $extension = $validTypes[$imageInfo['mime']];
+          $storedName = bin2hex(random_bytes(8)) . '.' . $extension;
+          $targetPath = upload_storage_path($storedName);
+
+          if (!move_uploaded_file($tmpName, $targetPath)) {
+            $failCount++;
+            $messages[] = htmlspecialchars($fileNameOriginal) . '：保存失败';
+            continue;
+          }
+
+          $imageTitle = $title;
+          if ($imageTitle === '') {
+            $imageTitle = pathinfo($fileNameOriginal, PATHINFO_FILENAME);
+          } elseif ($count > 1) {
+            $imageTitle = $title . '-' . ($i + 1);
+          }
+
+          $filePath = 'uploads/' . $storedName;
+          try {
+            $stmt = $pdo->prepare(
+              'INSERT INTO images (title, description, file_path, is_remote, created_at) VALUES (?, ?, ?, ?, NOW())'
+            );
+            $stmt->execute([$imageTitle, $description, $filePath, 0]);
+            log_action($pdo, $_SESSION['username'] ?? 'admin', 'upload_image', 'uploaded image: ' . $imageTitle);
+            $successCount++;
+          } catch (PDOException $e) {
+            @unlink($targetPath);
+            $failCount++;
+            $messages[] = htmlspecialchars($fileNameOriginal) . '：保存到数据库失败';
+            error_log('Upload DB error: ' . $e->getMessage());
+          }
+        }
+
+        if ($successCount > 0) {
+          $upload_result = '<div class="alert alert-success">✅ 成功上传 ' . $successCount . ' 张图片。</div>';
+        }
+        if ($failCount > 0) {
+          $upload_result .= '<div class="alert alert-warning">部分文件失败：<ul><li>' . implode('</li><li>', $messages) . '</li></ul></div>';
         }
       }
     }
 
-    if ($filePath !== '' && $upload_result === '') {
+    if ($type === 'remote' && $filePath !== '' && $upload_result === '') {
       try {
         $stmt = $pdo->prepare(
           'INSERT INTO images (title, description, file_path, is_remote, created_at) VALUES (?, ?, ?, ?, NOW())'
@@ -73,10 +118,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         log_action($pdo, $_SESSION['username'] ?? 'admin', 'upload_image', 'uploaded image: ' . $title);
         $upload_result = '<div class="alert alert-success">✅ 上传成功！图片已保存为：<strong>' . htmlspecialchars($title) . '</strong></div>';
       } catch (PDOException $e) {
-        if ($isRemote === 0 && $filePath !== '' && strpos($filePath, 'uploads/') === 0) {
-          $localPath = upload_storage_path(basename($filePath));
-          @unlink($localPath);
-        }
         $upload_result = '<div class="alert alert-danger">❌ 保存到数据库失败</div>';
         error_log('Upload DB error: ' . $e->getMessage());
       }
@@ -96,8 +137,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="row">
       <div class="col-md-6">
         <div class="mb-3">
-          <label class="form-label">图片标题 <span class="text-danger">*</span></label>
-          <input type="text" name="title" class="form-control" placeholder="输入图片标题（缺省时使用文件名）" id="imageTitle">
+          <label class="form-label">图片标题</label>
+          <input type="text" name="title" class="form-control" placeholder="单图：标题；多图：作为前缀" id="imageTitle">
         </div>
 
         <div class="mb-3">
@@ -134,12 +175,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div>
               <i class="fas fa-image" style="font-size: 2.5rem; color: #aaa;"></i>
               <p class="mt-2 text-muted">
-                <strong>点击选择</strong> 或拖放图片文件到此处
+                <strong>点击选择</strong> 或拖放图片文件到此处（支持多选）
               </p>
               <small class="text-muted d-block">支持格式：JPEG、PNG、GIF、WebP</small>
               <small class="text-muted d-block">最大文件大小：2MB</small>
             </div>
-            <input type="file" name="image" id="adminImageInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display: none;" required>
+            <input type="file" name="images[]" id="adminImageInput" accept="image/jpeg,image/png,image/gif,image/webp" multiple style="display: none;" required>
           </div>
         </div>
 
@@ -147,6 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <label class="form-label">预览</label>
           <img id="imagePreview" src="" alt="预览" class="img-thumbnail" style="max-width: 100%; max-height: 300px; object-fit: contain;">
           <p id="adminFileName" class="text-muted small mt-2"></p>
+          <ul id="adminFileList" class="small text-muted mt-2 mb-0"></ul>
         </div>
       </div>
     </div>
@@ -164,6 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const imageTitle = document.getElementById('imageTitle');
   const fileName = document.getElementById('adminFileName');
   const previewContainer = document.getElementById('previewContainer');
+  const fileList = document.getElementById('adminFileList');
   const form = document.getElementById('adminAddImageForm');
 
   function updateUploadFields() {
@@ -235,37 +278,45 @@ document.addEventListener('DOMContentLoaded', function() {
   fileInput.addEventListener('change', handleFileSelect);
 
   function handleFileSelect() {
-    const file = fileInput.files[0];
-    if (!file) return;
+    const files = Array.from(fileInput.files || []);
+    if (!files.length) return;
 
-    // 验证文件类型
     const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
-      alert('仅支持 JPEG、PNG、GIF、WebP 格式');
-      fileInput.value = '';
-      return;
+    const maxSize = 2 * 1024 * 1024;
+
+    for (const file of files) {
+      if (!validTypes.includes(file.type)) {
+        alert('仅支持 JPEG、PNG、GIF、WebP 格式');
+        fileInput.value = '';
+        return;
+      }
+      if (file.size > maxSize) {
+        alert('文件大小不能超过 2MB');
+        fileInput.value = '';
+        return;
+      }
     }
 
-    // 验证文件大小
-    if (file.size > 2 * 1024 * 1024) {
-      alert('文件大小不能超过 2MB');
-      fileInput.value = '';
-      return;
-    }
-
-    // 显示预览
+    const firstFile = files[0];
     const reader = new FileReader();
     reader.onload = (e) => {
       imagePreview.src = e.target.result;
-      fileName.textContent = '文件名：' + file.name + ' (' + (file.size / 1024).toFixed(2) + ' KB)';
+      fileName.textContent = '已选择 ' + files.length + ' 个文件，首个：' + firstFile.name + ' (' + (firstFile.size / 1024).toFixed(2) + ' KB)';
       previewContainer.style.display = 'block';
-      
-      // 如果标题为空，自动填入文件名
-      if (!imageTitle.value) {
-        imageTitle.value = file.name.split('.')[0];
+      if (fileList) {
+        fileList.innerHTML = '';
+        files.forEach((f) => {
+          const li = document.createElement('li');
+          li.textContent = f.name + ' (' + (f.size / 1024).toFixed(2) + ' KB)';
+          fileList.appendChild(li);
+        });
+      }
+
+      if (!imageTitle.value && files.length === 1) {
+        imageTitle.value = firstFile.name.split('.')[0];
       }
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(firstFile);
   }
 
   if (form) {
