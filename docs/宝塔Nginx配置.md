@@ -1,5 +1,7 @@
 # 宝塔 Nginx 配置调试指南
 
+> 通用部署与路由配置请先看 [部署说明](部署说明.md)，本文仅覆盖宝塔特有问题。
+
 ## 问题症状
 
 访问 `/install/` 或 `/admin/` 返回 404，虽然已设置了 location 路由。
@@ -93,16 +95,16 @@ server {
     gzip_proxied expired no-cache no-store private auth;
     gzip_disable "MSIE [1-6]\.";
 
-    access_log /www/wwwlogs/youdomain.com.log;
-    error_log /www/wwwlogs/img.jzyskk.com.error.log;
+    access_log /www/wwwlogs/your-domain.com.log;
+    error_log /www/wwwlogs/your-domain.com.error.log;
 }
 ```
 
 ### 方案 B：检查并修改宝塔重写规则文件
 
-编辑 `/www/server/panel/vhost/rewrite/img.jzykkk.com.conf`：
+编辑 `/www/server/panel/vhost/rewrite/your-domain.com.conf`：
 
-1. 打开宝塔面板 → 网站 → img.jzykkk.com → 反向代理/重写规则
+1. 打开宝塔面板 → 网站 → your-domain.com → 反向代理/重写规则
 2. 查看是否有类似以下的规则，若有，添加排除：
 
 ```nginx
@@ -128,8 +130,8 @@ if ($uri !~ "^/(install|admin)/") {
 
 如果伪静态配置有问题，可以直接在 Nginx 配置中添加：
 
-1. 宝塔面板 → 网站 → img.jzykkk.com → 配置文件
-2. 在 `include /www/server/panel/vhost/rewrite/img.jzykkk.com.conf;` **之后**，添加：
+1. 宝塔面板 → 网站 → your-domain.com → 配置文件
+2. 在 `include /www/server/panel/vhost/rewrite/your-domain.com.conf;` **之后**，添加：
 
 ```nginx
 # 网站路由结构（在 rewrite 包含之后）
@@ -156,11 +158,11 @@ systemctl restart nginx
 # 或通过宝塔面板：网站 → 重启
 
 # 3. 测试访问
-curl -I http://img.jzykkk.com/install/
+curl -I http://your-domain.com/install/
 # 应返回 200（或 302 重定向），而非 404
 
 # 4. 查看错误日志
-tail -f /www/wwwlogs/img.jzykkk.com.error.log
+tail -f /www/wwwlogs/your-domain.com.error.log
 ```
 
 ## 目录结构检查
@@ -169,13 +171,13 @@ tail -f /www/wwwlogs/img.jzykkk.com.error.log
 
 ```bash
 # 检查 Gallery 目录
-ls -la /www/wwwroot/img.jzykkk.com/Gallery/
+ls -la /www/wwwroot/your-domain.com/Gallery/
 
 # 检查 install 目录
-ls -la /www/wwwroot/img.jzykkk.com/Gallery/install/
+ls -la /www/wwwroot/your-domain.com/Gallery/install/
 
 # 检查 admin 目录
-ls -la /www/wwwroot/img.jzykkk.com/Gallery/admin/
+ls -la /www/wwwroot/your-domain.com/Gallery/admin/
 ```
 
 如果目录不存在，需要先创建或从代码库复制。
@@ -189,55 +191,9 @@ ls -la /www/wwwroot/img.jzykkk.com/Gallery/admin/
 | 502 Bad Gateway | PHP-FPM 未运行或端口错误 | 检查 fastcgi_pass 127.0.0.1:9000 |
 | 重定向循环 | try_files 指向不存在的 PHP | 确保 /install/index.php 存在 |
 
-## 推荐方案：使用宝塔伪静态规则（最简单）
+## 备注
 
-**不需要改 Nginx 配置，直接在宝塔伪静态中添加：**
-
-1. 宝塔面板 → 网站 → img.jzykkk.com → **伪静态**
-2. 选择规则类型，如果有下拉菜单选择 **ThinkPHP** 或 **通用** 规则为基础
-3. 清空现有规则，粘贴以下正确的宝塔伪静态语法：
-
-```
-# 将 /install/ 请求转发给 /install/index.php
-^/install/(.*)$ /install/index.php?$query_string [L]
-
-# 将 /admin/ 请求转发给 /admin/index.php  
-^/admin/(.*)$ /admin/index.php?$query_string [L]
-```
-
-**正确方式（逐行添加）：**
-- 第一行输入：`^/install/(.*)$ /install/index.php?$query_string [L]`  点击「添加」
-- 第二行输入：`^/admin/(.*)$ /admin/index.php?$query_string [L]`  点击「添加」
-- 点击「保存」→ **重启 Nginx**
-
-**这个规则的含义：**
-- ^/install/(.*) — 匹配 /install/ 开头的任何路径
-- /install/index.php?$query_string — 转发给 /install/index.php 并保留查询参数
-- [L] — Last flag，停止处理后续规则
-
-4. 测试：访问 `http://img.jzykkk.com/install/`
-
-**如果宝塔伪静态界面一直报错，改用 Nginx 配置：**
-
-不要用伪静态，依然会报 `if` 的语法错误。转用下面的 Nginx 配置方式。
-
-## 如果伪静态不行，检查以下：
-
-### 1. 确认目录存在
-
-在服务器执行：
-```bash
-ls -la /www/wwwroot/img.jzykkk.com/Gallery/install/
-ls -la /www/wwwroot/img.jzykkk.com/Gallery/admin/
-```
-
-如果不存在，需要从代码复制过来。
-
-### 2. 查看错误日志
-
-```bash
-tail -50 /www/wwwlogs/img.jzykkk.com.error.log
-```
+- 若需伪静态规则，请参考 [部署说明](部署说明.md) 中的 Nginx 伪静态示例。
 
 看是否有具体的错误信息（如 rewrite loop、file not found 等）。
 
