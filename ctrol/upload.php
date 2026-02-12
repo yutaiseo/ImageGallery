@@ -1,7 +1,7 @@
 <?php
 // upload.php - 简单上传接口（如果需要AJAX上传，可扩展）
 require_once __DIR__ . '/bootstrap.php';
-require_admin();
+require_admin_write();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
     $token = $_POST['csrf_token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');

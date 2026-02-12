@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
     if ($newUsername === '' || $newPassword === '') {
       $alerts[] = ['type' => 'danger', 'text' => '用户名和密码不能为空'];
-    } elseif (!in_array($newRole, ['admin', 'superadmin'], true)) {
+    } elseif (!in_array($newRole, ['admin', 'superadmin', 'demo'], true)) {
       $alerts[] = ['type' => 'danger', 'text' => '角色不合法'];
     } elseif (strlen($newPassword) < 8) {
       $alerts[] = ['type' => 'danger', 'text' => '密码至少 8 位'];
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
   } elseif ($action === 'update_role') {
     $id = intval($_POST['id'] ?? 0);
     $newRole = $_POST['role'] ?? '';
-    if ($id <= 0 || !in_array($newRole, ['admin', 'superadmin'], true)) {
+    if ($id <= 0 || !in_array($newRole, ['admin', 'superadmin', 'demo'], true)) {
       $alerts[] = ['type' => 'danger', 'text' => '参数错误'];
     } else {
       $stmt = $pdo->prepare('SELECT username, role FROM users WHERE id = ?');
@@ -175,6 +175,7 @@ if ($search !== '') {
           <select class="form-select" name="new_role">
             <option value="admin" selected>管理员</option>
             <option value="superadmin">超级管理员</option>
+            <option value="demo">演示账号</option>
           </select>
         </div>
         <div class="col-md-3">
@@ -211,7 +212,7 @@ if ($search !== '') {
           <td><?php echo htmlspecialchars($u['id']); ?></td>
           <td><?php echo htmlspecialchars($u['username']); ?></td>
           <td>
-            <span class="badge bg-<?php echo ($u['role'] === 'superadmin') ? 'danger' : 'secondary'; ?>">
+            <span class="badge bg-<?php echo ($u['role'] === 'superadmin') ? 'danger' : ($u['role'] === 'demo' ? 'warning' : 'secondary'); ?>">
               <?php echo htmlspecialchars($u['role']); ?>
             </span>
           </td>
@@ -224,6 +225,7 @@ if ($search !== '') {
               <select name="role" class="form-select form-select-sm d-inline-block w-auto">
                 <option value="admin" <?php echo ($u['role'] === 'admin') ? 'selected' : ''; ?>>管理员</option>
                 <option value="superadmin" <?php echo ($u['role'] === 'superadmin') ? 'selected' : ''; ?>>超级管理员</option>
+                <option value="demo" <?php echo ($u['role'] === 'demo') ? 'selected' : ''; ?>>演示账号</option>
               </select>
               <button class="btn btn-sm btn-outline-primary">更新</button>
             </form>

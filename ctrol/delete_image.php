@@ -1,7 +1,7 @@
 <?php
 // delete_image.php - 处理删除图片
 require_once __DIR__ . '/bootstrap.php';
-require_admin();
+require_admin_write();
 require_once __DIR__ . '/../Gallery/cache_utils.php';
 
 if (isset($_GET['id'])) {

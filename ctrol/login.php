@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($user && password_verify($password, $user['password_hash'])) {
-                if (!in_array($user['role'], ['admin', 'superadmin'], true)) {
+                if (!in_array($user['role'], ['admin', 'superadmin', 'demo'], true)) {
                     $error = '无权限登录后台';
                     log_action($pdo, $username, 'login_denied', 'role denied: ' . ($user['role'] ?? 'unknown'));
                 } else {

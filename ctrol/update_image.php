@@ -1,7 +1,7 @@
 <?php
 // update_image.php - 处理更新图片
 require_once __DIR__ . '/bootstrap.php';
-require_admin();
+require_admin_write();
 require_once __DIR__ . '/../Gallery/cache_utils.php';
 
 // 压缩图片到指定大小和质量

@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
-require_admin();
+require_admin_write();
 require_once __DIR__ . '/../Gallery/cdn_assets.php';
 
 $page_title = '云服务配置';

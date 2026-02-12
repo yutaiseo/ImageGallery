@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
-require_admin();
+require_admin_write();
 
 $error = '';
 $success = '';
@@ -42,58 +42,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pageTitle = '修改密码';
-$showNavbar = true;
-$includeGalleryScripts = false;
-$includeClockScript = false;
-include __DIR__ . '/../Gallery/header.php';
+$page_title = '修改密码';
+include __DIR__ . '/header.php';
 ?>
 
-<div class="container mt-4 flex-grow-1">
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">修改密码</h5>
-                </div>
-                <div class="card-body">
-                    <?php if ($error): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <?= htmlspecialchars($error) ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                    <?php endif; ?>
+<div class="mt-3">
+    <h3>修改密码</h3>
 
-                    <?php if ($success): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <?= htmlspecialchars($success) ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                    <?php endif; ?>
-
-                    <form method="post" action="">
-                        <div class="mb-3">
-                            <label for="current_password" class="form-label">当前密码</label>
-                            <input type="password" class="form-control" id="current_password" 
-                                   name="current_password" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="new_password" class="form-label">新密码</label>
-                            <input type="password" class="form-control" id="new_password" 
-                                   name="new_password" required minlength="8">
-                            <small class="form-text text-muted">至少 8 个字符</small>
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirm_password" class="form-label">确认新密码</label>
-                            <input type="password" class="form-control" id="confirm_password" 
-                                   name="confirm_password" required minlength="8">
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">修改密码</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+    <?php if ($error): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <?= htmlspecialchars($error) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
+    <?php endif; ?>
+
+    <?php if ($success): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <?= htmlspecialchars($success) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <?php endif; ?>
+
+    <form method="post" action="" class="card p-4 shadow-sm" style="max-width: 520px;">
+        <div class="mb-3">
+            <label for="current_password" class="form-label">当前密码</label>
+            <input type="password" class="form-control" id="current_password" name="current_password" required>
+        </div>
+        <div class="mb-3">
+            <label for="new_password" class="form-label">新密码</label>
+            <input type="password" class="form-control" id="new_password" name="new_password" required minlength="8">
+            <small class="form-text text-muted">至少 8 个字符</small>
+        </div>
+        <div class="mb-3">
+            <label for="confirm_password" class="form-label">确认新密码</label>
+            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required minlength="8">
+        </div>
+        <button type="submit" class="btn btn-primary">修改密码</button>
+    </form>
 </div>
 
-<?php include __DIR__ . '/../Gallery/footer.php'; ?>
+<?php include __DIR__ . '/footer.php'; ?>

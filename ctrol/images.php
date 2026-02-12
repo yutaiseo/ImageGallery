@@ -2,6 +2,7 @@
 require_once __DIR__ . '/bootstrap.php';
 require_admin();
 require_once __DIR__ . '/logger.php';
+$isDemo = is_demo();
 $page_title = '图片管理';
 include __DIR__ . '/header.php';
 
@@ -13,6 +14,9 @@ $offset = ($page - 1) * $perPage;
 
 // 处理删除动作（软删除，移动到回收站）及批量操作
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+  if ($isDemo) {
+    echo '<div class="alert alert-warning">演示账号为只读模式，无法执行操作。</div>';
+  } else {
   $action = $_POST['action'];
   if ($action === 'delete') {
     $token = $_POST['csrf_token'] ?? '';
@@ -46,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
       log_action($pdo, $_SESSION['username'] ?? 'unknown', 'batch_soft_delete', 'moved ' . $count . ' images to recycle bin');
       echo '<div class="alert alert-success">已将 ' . $count . ' 张图片移入回收站。</div>';
     }
+  }
   }
 }
 
@@ -113,8 +118,10 @@ $totalPages = max(1, ceil($total / $perPage));
     <input type="hidden" name="action" value="batch_delete">
     <input type="hidden" name="id" id="singleImageId" value="">
     <div class="mb-2">
+      <?php if (!$isDemo): ?>
       <label class="form-check"><input type="checkbox" id="selectAll" class="form-check-input"> <span>全选所有图片</span></label>
       <button type="submit" class="btn btn-sm btn-danger ms-3 js-confirm" data-confirm="确认将选中的图片移入回收站？"><i class="fas fa-trash"></i> 批量删除</button>
+      <?php endif; ?>
     </div>
     <div class="row g-4 mt-2">
     <?php foreach ($images as $img): ?>
@@ -123,14 +130,17 @@ $totalPages = max(1, ceil($total / $perPage));
           <?php $imgUrl = build_image_url($img['file_path'], (int)$img['is_remote']); ?>
           <div style="height: 200px; background-size: cover; background-position: center; background-image: url('<?php echo htmlspecialchars($imgUrl); ?>');" class="card-img-top"></div>
           <div class="card-body d-flex flex-column">
+            <?php if (!$isDemo): ?>
             <div class="form-check mb-2">
               <input class="form-check-input" type="checkbox" name="ids[]" value="<?php echo (int)$img['id']; ?>" id="img_<?php echo (int)$img['id']; ?>">
               <label class="form-check-label" for="img_<?php echo (int)$img['id']; ?>">选中此项</label>
             </div>
+            <?php endif; ?>
             <h6 class="card-title"><?php echo htmlspecialchars($img['title']); ?></h6>
             <p class="card-text"><small class="text-muted"><i class="fas fa-calendar-alt"></i> <?php echo htmlspecialchars($img['created_at']); ?></small></p>
             <div class="d-flex gap-2 mt-auto">
               <a class="btn btn-sm btn-primary flex-grow-1" href="../download.php?id=<?php echo (int)$img['id']; ?>"><i class="fas fa-download"></i> 下载</a>
+              <?php if (!$isDemo): ?>
               <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal"
                       data-image-id="<?php echo (int)$img['id']; ?>"
                       data-image-title="<?php echo htmlspecialchars($img['title']); ?>"
@@ -138,6 +148,7 @@ $totalPages = max(1, ceil($total / $perPage));
                       data-image-url="<?php echo htmlspecialchars($imgUrl); ?>"
                       title="编辑图片"><i class="fas fa-edit"></i></button>
               <button type="button" class="btn btn-sm btn-danger js-form-action" data-form="batchForm" data-action="delete" data-id="<?php echo (int)$img['id']; ?>" data-confirm="确认删除此图片吗？" title="删除图片"><i class="fas fa-trash"></i></button>
+              <?php endif; ?>
             </div>
           </div>
         </div>
@@ -145,6 +156,7 @@ $totalPages = max(1, ceil($total / $perPage));
     <?php endforeach; ?>
     </div>
   </form>
+  <?php if (!$isDemo): ?>
   <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -182,6 +194,7 @@ $totalPages = max(1, ceil($total / $perPage));
       </div>
     </div>
   </div>
+  <?php endif; ?>
 
   <nav class="mt-4">
     <ul class="pagination justify-content-center">

@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
-require_admin();
+require_admin_write();
 
 $page_title = '图片上传';
 include __DIR__ . '/header.php';

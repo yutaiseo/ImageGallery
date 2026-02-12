@@ -2,7 +2,7 @@
 // add_image.php - 处理添加图片
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/../Gallery/cache_utils.php';
-require_admin();
+require_admin_write();
 
 // 压缩图片到指定大小和质量
 function compress_image($sourcePath, $targetPath, $maxSize = 800 * 1024, $quality = 75) {

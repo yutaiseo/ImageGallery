@@ -11,7 +11,7 @@ function require_admin()
         exit;
     }
     $role = $_SESSION['role'] ?? '';
-    if (!in_array($role, ['admin', 'superadmin'], true)) {
+    if (!in_array($role, ['admin', 'superadmin', 'demo'], true)) {
         header('HTTP/1.1 403 Forbidden');
         echo 'Forbidden: admin only';
         exit;
@@ -34,6 +34,21 @@ function require_superadmin()
 function is_superadmin()
 {
     return !empty($_SESSION['role']) && $_SESSION['role'] === 'superadmin';
+}
+
+function is_demo()
+{
+    return !empty($_SESSION['role']) && $_SESSION['role'] === 'demo';
+}
+
+function require_admin_write($message = 'Demo account is read-only')
+{
+    require_admin();
+    if (is_demo()) {
+        header('HTTP/1.1 403 Forbidden');
+        echo $message;
+        exit;
+    }
 }
 
 function current_user()
